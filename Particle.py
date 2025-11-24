@@ -5,7 +5,7 @@ class Particle:
     def __init__(self, position, color):
         self.position = position
         self.color = color
-        self.mass = 10 #9.109 *  10**-31
+        self.mass = 1 #9.109 *  10**-31
         self.velocity = [0, 0]
         self.acceleration = [0, 0]
         self.radius = 1
@@ -29,8 +29,7 @@ class Particle:
         if self.position[1] < 0 or self.position[1] > screen.get_height():
             self.velocity[1] *= -1
 
-    def force(self, other):
-        G = 1 #6.67 * 10**-11
+    def force(self, other, G):
 
         dx = other.position[0] - self.position[0]
         dy = other.position[1] - self.position[1]
@@ -39,10 +38,10 @@ class Particle:
         if dist == 0:
             return
 
-        F = G * self.mass * other.mass / dist ** 2
+        F = G * self.mass * other.mass #/ dist ** 2
 
-        ax = F * dx / dist / self.mass
-        ay = F * dy / dist / self.mass
+        ax = F * (dx / dist) / self.mass
+        ay = F * (dy / dist) / self.mass
 
         self.acceleration[0] += ax
         self.acceleration[1] += ay
