@@ -4,10 +4,25 @@ import random
 import pygame
 from Particle import Particle
 
-def rule(particles1, particles2, g):
+def rule(particles1, particles2, g, screen):
     for p1 in particles1:
+        fx = 0
+        fy = 0
         for p2 in particles2:
-            p1.force(p2, g)
+            dx = p1.position[0] - p2.position[0]
+            dy = p1.position[1] - p2.position[1]
+            d = (dx * dx + dy * dy) ** 0.5
+            if 0 < d < 80:
+                F = g * (1/d)
+                fx += F * dx
+                fy += F * dy
+
+        p1.velocity[0] = (p1.velocity[0] + fx) * 0.5
+        p1.velocity[1] = (p1.velocity[1] + fy) * 0.5
+        p1.position[0] += p1.velocity[0]
+        p1.position[1] += p1.velocity[1]
+
+        p1.wall_collision(screen)
 
 def run_simulation():
     pygame.init()
@@ -19,18 +34,18 @@ def run_simulation():
 
     reds = [
         Particle([random.randint(0, 800), random.randint(0, 600)], "red")
-        for _ in range(100)
+        for _ in range(200)
     ]
-    yellows = [
+    blues = [
         Particle([random.randint(0, 800), random.randint(0, 600)], "blue")
-        for _ in range(300)
+        for _ in range(200)
     ]
     greens = [
         Particle([random.randint(0, 800), random.randint(0, 600)], "green")
-        for _ in range(300)
+        for _ in range(200)
     ]
 
-    particles = reds + yellows + greens
+    particles = reds + blues + greens
 
     while running:
         for event in pygame.event.get():
@@ -43,18 +58,18 @@ def run_simulation():
             particle.acceleration = [0, 0]
 
         screen.fill((0, 0, 0))
-        dt = clock.tick(fps) / 1000
 
-        rule(reds, reds, 1)
-        rule(yellows, yellows, -0.01)
-        rule(reds, yellows, -0.01)
+        rule(greens, greens, -0.32, screen)
+        rule(greens, reds, -0.17, screen)
+        rule(greens, blues, 0.34, screen)
 
-        rule(greens, greens, -0.1)
-        rule(greens, yellows, 0.01)
-        rule(reds, greens, -0.01)
+        rule(reds, reds, -0.10, screen)
+        rule(reds, greens, -0.34, screen)
+
+        rule(blues, blues, 0.15, screen)
+        rule(blues, greens, -0.20, screen)
 
         for particle in particles:
-            particle.move(dt, screen)
             particle.draw(screen)
 
         pygame.display.flip()
